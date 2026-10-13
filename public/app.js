@@ -17,6 +17,26 @@ const outputs = () => state.files.flatMap(f => f.outputs || []);
 const size = bytes => bytes >= 1e9 ? `${(bytes / 1e9).toFixed(2)} GB` : bytes >= 1e6 ? `${(bytes / 1e6).toFixed(2)} MB` : `${Math.max(1, Math.round(bytes / 1e3))} KB`;
 const duration = seconds => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
 
+function updateCustomSettings() {
+  const value = options();
+  const custom = !!(value.prefix || value.suffix || value.naming !== defaults.naming || value.longVideo !== defaults.longVideo ||
+    (config && $('outputRoot').value.trim() !== config.outputRoot) ||
+    (value.catbox && (value.encoding !== defaults.encoding || value.includeSource || value.userhash)));
+  $('advancedIndicator').hidden = !custom;
+  $('customSettingsNotice').hidden = !$('advancedPanel').hidden || !custom;
+}
+function setAdvanced(enabled) {
+  document.documentElement.dataset.mode = enabled ? 'advanced' : 'simple';
+  $('advancedPanel').hidden = !enabled;
+  $('simpleMode').setAttribute('aria-pressed', String(!enabled));
+  $('advancedMode').setAttribute('aria-pressed', String(enabled));
+  try { localStorage.setItem('gem-interface-mode', enabled ? 'advanced' : 'simple'); } catch {}
+  updateCustomSettings();
+}
+$('simpleMode').addEventListener('click', () => setAdvanced(false));
+$('advancedMode').addEventListener('click', () => setAdvanced(true));
+$('reviewSettings').addEventListener('click', () => { setAdvanced(true); $('naming').focus(); });
+
 function showToast(message) {
   $('toast').textContent = message; $('toast').hidden = false;
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').hidden = true; }, 6500);
@@ -48,9 +68,9 @@ function updateSettings() {
   }
   for (const id of ['encoding', 'includeSource', 'userhash']) $(id).disabled = !catbox;
   $('catboxDisclosure').hidden = !catbox;
-  $('longVideoSummary').textContent = $('longVideo').value === 'split' ? 'Split into parts' : 'Skip long videos';
-  const hints = { base64url: 'Reversible, compact, and safe on Windows, macOS, and Linux.', base64: 'Standard Base64 with padding. Any / becomes %2F for a valid filename.', utf8: 'Readable URL text. : and / are escaped so the name works on every system.', percent: 'Encodes the UTF-8 URL with percent escapes. Decode it to restore the full link.', hex: 'The UTF-8 URL as hexadecimal. Longer, but fully reversible.' };
-  $('encodingHint').textContent = catbox ? hints[$('encoding').value] : 'Enable Catbox to put an audio link in the filename.';
+  const hints = { base64url: 'Compact and filename-safe.', base64: 'Standard Base64; / becomes %2F.', utf8: 'Readable URL; : and / are escaped.', percent: 'Percent-encoded URL.', hex: 'UTF-8 bytes in hex. Longer, but reversible.' };
+  $('encodingHint').textContent = catbox ? hints[$('encoding').value] : 'Enable Catbox audio above.';
+  updateCustomSettings();
   const saved = options(); delete saved.userhash; saved.catbox = false;
   try { localStorage.setItem('frame-settings', JSON.stringify(saved)); } catch {}
   clearTimeout(previewTimer); filenameRequest++; filenameValid = false; updateActions();
@@ -66,20 +86,24 @@ async function updateFilename() {
   } catch (error) {
     if (request !== filenameRequest) return;
     $('filenameError').textContent = error.message; $('filenameError').hidden = false; filenameValid = false;
+    setAdvanced(true);
   }
   updateActions();
 }
 function updateActions() {
   const busy = active() || starting;
+  $('engineStatus').innerHTML = `<span class="status-dot"></span> ${!connected ? 'Offline' : config?.dependencies.ready ? 'Local · ready' : 'Setup needed'}`;
+  $('engineStatus').dataset.state = connected ? 'ready' : 'offline';
   $('settingsFields').disabled = busy;
   $('convertButton').disabled = !connected || !config?.dependencies.ready || !candidates().length || importing || busy || !filenameValid;
-  $('convertButton').hidden = active(); $('cancelButton').hidden = !active();
+  $('convertButton').hidden = active() || (state.files.length > 0 && !candidates().length); $('cancelButton').hidden = !active();
   $('clearButton').disabled = busy || importing || !state.files.length;
+  $('clearButton').hidden = !state.files.length;
   $('addButton').disabled = importing || !connected || !config?.dependencies.ready;
   $('folderButton').disabled = $('addButton').disabled;
   $('dropzone').setAttribute('aria-disabled', $('addButton').disabled);
   const n = candidates().length;
-  $('convertButton').innerHTML = `${starting ? 'Starting…' : n ? `Convert ${n} ${n === 1 ? 'video' : 'videos'}` : 'Convert videos'} ${svg('arrow')}`;
+  $('convertButton').innerHTML = `${starting ? 'Starting…' : n ? `Convert ${n}` : 'Convert'} ${svg('arrow')}`;
   $('downloadAll').disabled = busy || !outputs().length;
   $('revealButton').disabled = !connected;
 }
@@ -88,9 +112,9 @@ function render() {
   updateRinContext(state);
   const count = state.files.length;
   $('fileCount').textContent = count;
+  $('fileCount').hidden = count === 0;
   $('dropzone').classList.toggle('compact', count > 0);
-  $('emptyMessage').hidden = count > 0;
-  $('queueSize').textContent = count ? `${count} ${count === 1 ? 'video' : 'videos'} · ${size(state.files.reduce((n, f) => n + f.size, 0))}` : 'No files added';
+  $('queueSize').textContent = '';
   const focused = document.activeElement?.dataset;
   const focusSelector = focused?.action ? `[data-action="${focused.action}"][data-id="${focused.id}"]` : null;
   $('fileList').innerHTML = state.files.map(file => {
@@ -105,18 +129,19 @@ function render() {
     </article>`;
   }).join('');
   if (focusSelector) $('fileList').querySelector(focusSelector)?.focus({ preventScroll: true });
-  const done = state.files.filter(f => f.state === 'done').length;
   const failed = state.files.filter(f => f.state === 'error').length;
   const out = outputs();
-  $('summaryTitle').textContent = active() ? `Converting your batch` : count ? candidates().length ? `${candidates().length} ${candidates().length === 1 ? 'video' : 'videos'} ready to convert` : `${done} ${done === 1 ? 'video' : 'videos'} converted` : 'Ready when you are';
-  $('summaryDetail').textContent = active() ? 'You can keep this tab in the background' : failed ? `${failed} ${failed === 1 ? 'file needs' : 'files need'} attention · convert again to retry` : count ? out.length ? `${out.length} verified ${out.length === 1 ? 'export' : 'exports'} saved` : 'Original files are always kept' : 'Add videos to start your first batch';
+  $('summaryTitle').textContent = active() ? 'Converting…' : candidates().length ? `${count} ${count === 1 ? 'video' : 'videos'} · ${size(state.files.reduce((n, f) => n + f.size, 0))}` : '';
+  $('summaryDetail').textContent = failed ? `${failed} failed. Convert again to retry.` : '';
+  $('summaryDetail').hidden = !failed;
   $('batchProgressWrap').hidden = !active();
   const progress = count ? Math.round(state.files.reduce((sum, file) => sum + (['done', 'error', 'cancelled'].includes(file.state) ? 100 : file.progress), 0) / count) : 0;
   $('batchProgress').value = progress; $('batchProgressLabel').textContent = `${progress}%`;
   $('resultsBar').hidden = out.length === 0;
-  $('resultsTitle').textContent = `${out.length} verified ${out.length === 1 ? 'export' : 'exports'}${active() ? ' saved so far' : ' ready'}`;
+  $('resultsTitle').textContent = `${out.length} ${active() ? 'saved' : 'ready'}`;
   const warningCount = out.filter(o => o.warning).length;
-  $('resultsSubtitle').textContent = warningCount ? `${warningCount} audio ${warningCount === 1 ? 'notice' : 'notices'} · see the queue for details` : 'Silent, size-checked, and saved on your device';
+  $('resultsSubtitle').textContent = warningCount ? `${warningCount} audio ${warningCount === 1 ? 'notice' : 'notices'} — see files above.` : '';
+  $('resultsSubtitle').hidden = warningCount === 0;
   if (state.batch?.error) { $('connectionNotice').textContent = state.batch.error; $('connectionNotice').hidden = false; }
   updateActions();
 }
@@ -138,9 +163,9 @@ async function refresh() {
     state = next; connected = true; $('connectionNotice').hidden = true;
     if (changed) { await loadThumbnails(); render(); }
     else updateActions();
-    if (justFinished) showToast(state.files.some(f => f.state === 'error') ? 'Batch finished. Some files need attention.' : 'Batch finished. Your exports are saved.');
+    if (justFinished && state.files.some(f => f.state === 'error')) showToast('Finished with errors. Check the affected files.');
   } catch (error) {
-    connected = false; $('connectionNotice').textContent = `Connection lost. Keep the Frame launcher open. ${error.message}`; $('connectionNotice').hidden = false; updateActions();
+    connected = false; $('connectionNotice').textContent = `Connection lost. Keep the launcher open. ${error.message}`; $('connectionNotice').hidden = false; updateActions();
   }
   pollTimer = setTimeout(refresh, active() ? 850 : 2500);
 }
@@ -158,7 +183,7 @@ function upload(file, index, total) {
       let result; try { result = JSON.parse(xhr.responseText); } catch { return reject(new Error('The file could not be imported.')); }
       xhr.status >= 200 && xhr.status < 300 ? resolve(result) : reject(new Error(result.error || 'Import failed.'));
     };
-    xhr.onerror = () => reject(new Error('Import interrupted. Check that the Frame launcher is still running.'));
+    xhr.onerror = () => reject(new Error('Import interrupted. Keep the launcher running.'));
     xhr.send(file);
   });
 }
@@ -225,12 +250,12 @@ $('convertButton').addEventListener('click', async () => {
 });
 $('cancelButton').addEventListener('click', async () => {
   $('cancelButton').disabled = true; $('cancelButton').textContent = 'Cancelling…';
-  try { await api('cancel', { method: 'POST' }); showToast('Cancelling. Completed exports will stay in the output folder.'); }
+  try { await api('cancel', { method: 'POST' }); showToast('Cancelling. Finished exports are kept.'); }
   catch (error) { showToast(error.message); }
-  finally { $('cancelButton').disabled = false; $('cancelButton').textContent = 'Cancel batch'; }
+  finally { $('cancelButton').disabled = false; $('cancelButton').textContent = 'Cancel'; }
 });
 $('clearButton').addEventListener('click', async () => {
-  try { state = await api('clear', { method: 'POST' }); await loadThumbnails(); render(); updateFilename(); showToast('Queue cleared. Exported files are still in the output folder.'); }
+  try { state = await api('clear', { method: 'POST' }); await loadThumbnails(); render(); updateFilename(); showToast('Cleared. Exports kept.'); }
   catch (error) { showToast(error.message); }
 });
 async function download(endpoint, filename) {
@@ -261,17 +286,18 @@ $('fileList').addEventListener('click', async event => {
 $('revealButton').addEventListener('click', async () => { try { await api('reveal', { method: 'POST' }); } catch (error) { showToast(error.message); } });
 $('downloadAll').addEventListener('click', async () => {
   $('downloadAll').disabled = true; $('downloadAll').innerHTML = `${svg('loader')} Preparing ZIP…`;
-  try { await download('archive', 'frame-exports.zip'); } catch (error) { showToast(error.message); }
-  finally { $('downloadAll').innerHTML = `${svg('download')} Download all`; updateActions(); }
+  try { await download('archive', '4chan-gem-exports.zip'); } catch (error) { showToast(error.message); }
+  finally { $('downloadAll').innerHTML = `${svg('download')} Download ZIP`; updateActions(); }
 });
 $('helpButton').addEventListener('click', () => $('helpDialog').showModal());
+$('profileButton').addEventListener('click', () => $('helpDialog').showModal());
 $('closeHelp').addEventListener('click', () => $('helpDialog').close());
 $('closePreview').addEventListener('click', () => $('previewDialog').close());
 $('previewDialog').addEventListener('close', () => { $('previewVideo').pause(); $('previewVideo').removeAttribute('src'); $('previewVideo').load(); if (previewUrl) URL.revokeObjectURL(previewUrl); previewUrl = null; });
 for (const id of ['helpDialog', 'previewDialog']) $(id).addEventListener('click', event => { if (event.target === $(id)) { const r = $(id).getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) $(id).close(); } });
 $('quitButton').addEventListener('click', async () => {
-  if (active() && !confirm('Quit Frame and cancel the current batch? Completed exports will be kept.')) return;
-  try { await api('shutdown', { method: 'POST' }); clearTimeout(pollTimer); connected = false; $('connectionNotice').textContent = 'Frame is closed. You can close this tab. Use the launcher to start again.'; $('connectionNotice').hidden = false; updateActions(); }
+  if (active() && !confirm('Quit and cancel this batch? Finished exports are kept.')) return;
+  try { await api('shutdown', { method: 'POST' }); clearTimeout(pollTimer); connected = false; $('connectionNotice').textContent = 'App closed. Use the launcher to start again.'; $('connectionNotice').hidden = false; updateActions(); }
   catch (error) { showToast(error.message); }
 });
 
@@ -281,9 +307,11 @@ async function boot() {
     $('outputRoot').value = config.outputRoot;
     let saved = defaults; try { saved = { ...defaults, ...JSON.parse(localStorage.getItem('frame-settings') || '{}'), catbox: false }; } catch {}
     applySettings(saved);
-    $('engineStatus').innerHTML = `<span class="status-dot"></span> ${config.dependencies.ready ? 'Conversion engine ready' : 'FFmpeg setup required'}`;
+    let advanced = false; try { advanced = localStorage.getItem('gem-interface-mode') === 'advanced'; } catch {}
+    setAdvanced(advanced);
+    $('engineStatus').innerHTML = `<span class="status-dot"></span> ${config.dependencies.ready ? 'Local · ready' : 'Setup needed'}`;
     if (!config.dependencies.ready) {
-      $('setupNotice').textContent = `${config.dependencies.error} Frame needs FFmpeg with VP9, H.264, and MP3 encoders. See README.md for installation steps, then restart Frame.`;
+      $('setupNotice').textContent = `${config.dependencies.error} Install FFmpeg with VP9, H.264, and MP3 support, then restart. See README.md.`;
       $('setupNotice').hidden = false;
     }
     await refresh();

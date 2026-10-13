@@ -48,7 +48,7 @@ export async function createApp({ outputRoot = path.join(ROOT, 'outputs'), token
   }
 
   async function manifest() {
-    const data = { application: 'Frame 1.1.0', profile: PROFILE, created: batch.started,
+    const data = { application: '4chan gem converter 1.2.0', profile: PROFILE, created: batch.started,
       files: batch.ids.map(id => files.get(id)).filter(Boolean).map(item => ({ source: item.name, state: item.state, error: item.error,
         outputs: item.outputs.map(({ path: filePath, audioPath, ...output }) => ({ ...output, file: path.relative(batch.outputDir, filePath), localAudio: audioPath ? path.relative(batch.outputDir, audioPath) : null })) })) };
     const temp = path.join(batch.outputDir, '.conversion-report.tmp');
@@ -92,9 +92,9 @@ export async function createApp({ outputRoot = path.join(ROOT, 'outputs'), token
         if (req.method !== 'GET' || !staticFiles[url.pathname]) return json(res, 404, { error: 'Not found.' });
         return await sendFile(req, res, path.join(ROOT, 'public', staticFiles[url.pathname]));
       }
-      if (!equal(req.headers['x-frame-token'], token)) return json(res, 401, { error: 'Open Frame using the link shown in the launcher.' });
-      if (closing) return json(res, 503, { error: 'Frame is shutting down.' });
-      if (req.method === 'GET' && url.pathname === '/api/config') return json(res, 200, { profile: PROFILE, dependencies: await depsPromise, outputRoot, extensions: [...EXTENSIONS], version: '1.1.0' });
+      if (!equal(req.headers['x-frame-token'], token)) return json(res, 401, { error: 'Open 4chan gem converter using the link shown in the launcher.' });
+      if (closing) return json(res, 503, { error: '4chan gem converter is shutting down.' });
+      if (req.method === 'GET' && url.pathname === '/api/config') return json(res, 200, { profile: PROFILE, dependencies: await depsPromise, outputRoot, extensions: [...EXTENSIONS], version: '1.2.0' });
       if (req.method === 'GET' && url.pathname === '/api/state') return json(res, 200, publicState());
       if (req.method === 'POST' && url.pathname === '/api/files') {
         const deps = await depsPromise;
@@ -196,16 +196,16 @@ export async function createApp({ outputRoot = path.join(ROOT, 'outputs'), token
         if (!archivePromise) {
           const outputFiles = [...results.values()].map(item => ({ path: item.path, name: `${item.id}/${item.name}` }));
           for (const output of results.values()) if (output.audioPath) outputFiles.push({ path: output.audioPath, name: `${output.id}/${path.basename(output.audioPath)}` });
-          const report = { application: 'Frame 1.1.0', profile: PROFILE, created: new Date().toISOString(),
+          const report = { application: '4chan gem converter 1.2.0', profile: PROFILE, created: new Date().toISOString(),
             files: [...files.values()].filter(item => item.outputs.length).map(item => ({ source: item.name,
               outputs: item.outputs.map(({ path: ignored, audioPath, ...output }) => ({ ...output,
                 file: `${output.id}/${output.name}`, localAudio: audioPath ? `${output.id}/${path.basename(audioPath)}` : null })) })) };
           const reportPath = path.join(work, 'archive-report.json');
           await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
           outputFiles.push({ path: reportPath, name: 'conversion-report.json' });
-          archivePromise = writeZip(outputFiles, path.join(work, 'frame-exports.zip')).then(() => path.join(work, 'frame-exports.zip'));
+          archivePromise = writeZip(outputFiles, path.join(work, '4chan-gem-exports.zip')).then(() => path.join(work, '4chan-gem-exports.zip'));
         }
-        try { return await sendFile(req, res, await archivePromise, 'frame-exports.zip'); }
+        try { return await sendFile(req, res, await archivePromise, '4chan-gem-exports.zip'); }
         finally { archivePromise = null; }
       }
       if (req.method === 'POST' && url.pathname === '/api/shutdown') {
@@ -232,13 +232,13 @@ export async function createApp({ outputRoot = path.join(ROOT, 'outputs'), token
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  if (Number(process.versions.node.split('.')[0]) < 22) throw new Error('Frame needs Node.js 22 or newer.');
+  if (Number(process.versions.node.split('.')[0]) < 22) throw new Error('4chan gem converter needs Node.js 22 or newer.');
   const app = await createApp();
   const portArg = process.argv.indexOf('--port');
   const requestedPort = portArg >= 0 ? Number(process.argv[portArg + 1]) : 0;
   app.server.listen(requestedPort, '127.0.0.1', () => {
     const url = `http://127.0.0.1:${app.server.address().port}/#${app.token}`;
-    console.log(`\n  FRAME · Local video converter\n\n  ${url}\n\n  Keep this window open while converting. Ctrl+C to quit.\n`);
+    console.log(`\n  4chan gem converter\n\n  ${url}\n\n  Keep this window open while converting. Ctrl+C to quit.\n`);
     if (!process.argv.includes('--no-open')) openExternal(url);
   });
   app.server.on('error', error => { console.error(error.message); app.close(); process.exitCode = 1; });

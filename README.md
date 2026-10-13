@@ -1,41 +1,44 @@
-# Frame · Tohsaka Edition
+# 4chan gem converter
 
 A local batch video converter for 4chan’s `/pol/`: drop in common video files, choose WebM or MP4, and get silent, verified exports. Optional Catbox uploads put a reversible audio link in the filename.
 
-The interface is always dark, with a cold graphite and steel-blue palette, restrained crimson accents, and two animated pixel-art Rin companions. Contextual tips work with hover, keyboard focus, or a tap. Pause character motion from the header; system reduced-motion settings are also respected. These are unofficial fan-made Rin Tohsaka illustrations, inspired by TYPE-MOON’s Fate/stay night. Asset prompts and provenance are recorded in [`public/art/provenance.json`](public/art/provenance.json).
+The interface is always dark, with a cold graphite and steel-blue palette, restrained crimson accents, and animated pixel-art Rin tips. Guidance appears on hover, keyboard focus, or a tap. Pause character motion from the header; system reduced-motion settings are also respected. These are unofficial fan-made Rin Tohsaka illustrations, inspired by TYPE-MOON’s Fate/stay night. Asset prompts and provenance are recorded in [`public/art/provenance.json`](public/art/provenance.json).
 
-![Frame’s dark Tohsaka-inspired interface, conversion queue, settings and pixel-art companions](docs/preview.jpg)
+![4chan gem converter in Simple mode](docs/preview.jpg)
 
-**No app-signing certificate, notarization, cloud backend, npm install, or account is required.** Frame is a source application served on your computer and opened in your regular browser. It requires **Node.js 22 or newer** and **FFmpeg/FFprobe 6 or newer** with `libvpx-vp9`, `libx264`, and `libmp3lame`. FFmpeg 8.1.1 and Node 24 were used for Windows verification.
+[Advanced view](docs/advanced.jpg) · [Completed batch](docs/completed-batch.jpg)
+
+**No app-signing certificate, notarization, cloud backend, npm install, or account is required.** 4chan gem converter is a source application served on your computer and opened in your regular browser. It requires **Node.js 22 or newer** and **FFmpeg/FFprobe 6 or newer** with `libvpx-vp9`, `libx264`, and `libmp3lame`. FFmpeg 8.1.1 and Node 24 were used for Windows verification.
 
 ## Start
 
 Install [Node.js LTS](https://nodejs.org/en/download) and [FFmpeg](https://ffmpeg.org/download.html), then extract the project into a writable folder.
 
-| System | Install FFmpeg | Launch Frame |
+| System | Install FFmpeg | Launch 4chan gem converter |
 | --- | --- | --- |
-| Windows | `winget install --id Gyan.FFmpeg -e` | Double-click **Start Frame.bat** |
+| Windows | `winget install --id Gyan.FFmpeg -e` | Double-click **Start 4chan gem converter.bat** |
 | macOS | `brew install ffmpeg` if you use Homebrew, or use a build linked by FFmpeg | In the project folder: `sh start.sh` |
 | Debian / Ubuntu | `sudo apt install ffmpeg` | In the project folder: `sh start.sh` |
 | Other Linux | Install FFmpeg with your distribution’s package manager | In the project folder: `sh start.sh` |
 
 Open a new terminal after installing dependencies so PATH changes take effect. The launchers also recognize `bin/ffmpeg` and `bin/ffprobe` (`.exe` on Windows), or you can set `FFMPEG_PATH` and `FFPROBE_PATH` to absolute executable paths. Those paths can contain spaces.
 
-The browser opens automatically at a private `127.0.0.1` address. If it does not, open the complete URL printed by the launcher. Keep the launcher running during conversion. **Quit Frame** or Ctrl+C stops it. Run `node server.mjs --no-open` to launch without opening a browser; `--port 4318` selects a port if needed.
+The browser opens automatically at a private `127.0.0.1` address. If it does not, open the complete URL printed by the launcher. Keep the launcher running during conversion. **Quit** or Ctrl+C stops it. Run `node server.mjs --no-open` to launch without opening a browser; `--port 4318` selects a port if needed.
 
-This source-based approach does not require a signed native app. It does require the runtimes above. A separately packaged Windows executable or macOS app can still encounter OS reputation/quarantine checks; Frame does not disable those protections. Catbox uses ordinary HTTPS with certificate verification enabled; users do not create or install their own certificates.
+This source-based approach does not require a signed native app. It does require the runtimes above. A separately packaged Windows executable or macOS app can still encounter OS reputation/quarantine checks; 4chan gem converter does not disable those protections. Catbox uses ordinary HTTPS with certificate verification enabled; users do not create or install their own certificates.
 
 ## Use
 
-1. Add multiple videos, drag files/folders onto the drop area, or choose **Add folder**.
+1. Add multiple videos, drag files/folders onto the drop area, or choose **Folder**.
 2. Choose **WebM / VP9** or **MP4 / H.264**.
-3. Optionally enable **Keep the audio separately** to publish the extracted audio to Catbox. This option starts off every new browser session.
-4. Convert the batch. Each item shows progress, errors, verified outputs, and any audio notice.
-5. Open the output folder, preview or download individual videos, copy an audio link, or download the complete ZIP.
+3. Use **Simple** for everyday conversion. Switch to **Advanced** for link encoding, prefix/suffix, original/random names, optional source names, Catbox userhash, long-video behavior, and output folder. Switching modes preserves your choices; a notice in Simple identifies active custom settings.
+4. Optionally enable **Catbox audio** to publish the extracted audio to Catbox. This option starts off every new browser session.
+5. Convert the batch. Each item shows progress, errors, verified outputs, and any audio notice.
+6. Open the output folder, preview or download individual videos, copy an audio link, or download the complete ZIP.
 
 Originals are never modified or deleted. Inputs are copied into an isolated temporary session directory; quitting or clearing the queue removes those copies. Finished outputs remain in `outputs/<batch>/`, with a `conversion-report.json` containing validation facts and full audio URLs. The queue itself is session-only. A forced process termination may leave temporary files in your system temporary directory.
 
-The output folder can be changed in **Advanced options** with an absolute path. Each conversion creates a separate batch subfolder, and existing files are not overwritten. Imported files are limited to 20 GiB each and need enough local disk space for their temporary copies.
+The output folder can be changed in **Advanced** with an absolute path. Each conversion creates a separate batch subfolder, and existing files are not overwritten. Imported files are limited to 20 GiB each and need enough local disk space for their temporary copies.
 
 Supported inputs include MP4, WebM, MOV, MKV, AVI, M4V, MPEG, WMV, FLV, MTS/M2TS, TS, OGV, 3GP, and VOB, subject to the codecs in the installed FFmpeg build. Corrupt, encrypted/DRM-protected, and unreadable files produce an error; other queued files continue.
 
@@ -47,11 +50,11 @@ The live [4chan board API](https://a.4cdn.org/boards.json) reported these `/pol/
 - `max_webm_filesize`: **4,194,304 bytes**.
 - `max_webm_duration`: **120 seconds**.
 
-MP4 attachments were also present on the [live `/pol/` board](https://boards.4chan.org/pol/). The older [API field documentation](https://github.com/4chan/4chan-API/blob/master/pages/Boards.md) labels the size field as KB, but the actual API and posting form returned the byte value above; Frame uses the live value as evidence.
+MP4 attachments were also present on the [live `/pol/` board](https://boards.4chan.org/pol/). The older [API field documentation](https://github.com/4chan/4chan-API/blob/master/pages/Boards.md) labels the size field as KB, but the actual API and posting form returned the byte value above; 4chan gem converter uses the live value as evidence.
 
-Frame deliberately uses a conservative profile: **strictly below 4,000,000 bytes**, at most 120 seconds, silent VP9 WebM or H.264 MP4, `yuv420p` (8-bit), one video stream, no subtitles/data/chapters, even dimensions, and at most 30 fps. The encoder scales to a bitrate-dependent maximum of 1280 pixels, below the commonly documented 2048-pixel video ceiling. The 2048 ceiling, codec choices, and silent-video policy are compatibility settings, not fields returned by the current board API.
+4chan gem converter deliberately uses a conservative profile: **strictly below 4,000,000 bytes**, at most 120 seconds, silent VP9 WebM or H.264 MP4, `yuv420p` (8-bit), one video stream, no subtitles/data/chapters, even dimensions, and at most 30 fps. The encoder scales to a bitrate-dependent maximum of 1280 pixels, below the commonly documented 2048-pixel video ceiling. The 2048 ceiling, codec choices, and silent-video policy are compatibility settings, not fields returned by the current board API.
 
-The bitrate is calculated from duration and a 3,800,000-byte target with additional overhead headroom. Two-pass encoding produces predictable sizes. If the output is still too large, Frame reduces the bitrate and tries again, up to five attempts. It then uses FFprobe to verify the actual streams, codec, pixel format, dimensions, frame rate, duration, and byte size, and FFmpeg to decode the entire result to catch corruption. Only a verified result is saved as a finished export.
+The bitrate is calculated from duration and a 3,800,000-byte target with additional overhead headroom. Two-pass encoding produces predictable sizes. If the output is still too large, 4chan gem converter reduces the bitrate and tries again, up to five attempts. It then uses FFprobe to verify the actual streams, codec, pixel format, dimensions, frame rate, duration, and byte size, and FFmpeg to decode the entire result to catch corruption. Only a verified result is saved as a finished export.
 
 Long videos are split into equal parts of at most 119 seconds, leaving room for timestamp/frame rounding. All of the source duration is retained; no silent truncation or duration-header trick is used. There is also a **Skip videos that are too long** option. Rotation and sample aspect ratio are normalized during encoding.
 
@@ -59,7 +62,7 @@ This profile is fixed and dated, so conversion remains offline. The app does not
 
 ## Catbox and filename settings
 
-Audio upload is opt-in. Frame extracts the **first audio stream**, encodes a stereo 128 kb/s MP3 for each video part, keeps a local copy, and sends it to the [documented Catbox API](https://catbox.moe/tools.php). Anyone with the uploaded link can listen. A Catbox userhash is optional and stays in memory; it is not saved in preferences or reports. Anonymous uploads are the default.
+Audio upload is opt-in. 4chan gem converter extracts the **first audio stream**, encodes a stereo 128 kb/s MP3 for each video part, keeps a local copy, and sends it to the [documented Catbox API](https://catbox.moe/tools.php). Anyone with the uploaded link can listen. A Catbox userhash is optional and stays in memory; it is not saved in preferences or reports. Anonymous uploads are the default.
 
 | Option | Encoding and recovery |
 | --- | --- |
@@ -77,7 +80,7 @@ If a source has no audio, conversion succeeds with a notice. If extraction/uploa
 
 ## Design and architecture
 
-The interface uses plain HTML, CSS, and JavaScript, with no CDN, web fonts, analytics, UI dependencies, or build step. The default view exposes the batch and two meaningful choices; filename/account/folder details live in advanced settings. It supports keyboard focus, labeled controls, live notices, reduced motion, responsive layouts, and individual output previews.
+The interface uses plain HTML, CSS, and JavaScript, with no CDN, web fonts, analytics, UI dependencies, or build step. Simple mode exposes the batch, format, and optional Catbox audio. Advanced mode reveals grouped controls for filenames, audio links, splitting, and output folders. Detailed requirements are in Help; Rin offers compact tips on demand. It supports keyboard focus, labeled controls, live notices, reduced motion, responsive layouts, and individual output previews.
 
 `server.mjs` is a Node standard-library loopback server. It binds only to `127.0.0.1`, checks Host/Origin and a random session token, exposes only known static files, and passes arguments to FFmpeg without a shell. Conversion runs sequentially to avoid saturating the machine with multiple encoders. Each job uses a separate working directory and pass log. The ZIP writer streams outputs to disk before delivery. All persistent settings except the Catbox userhash are limited to harmless UI preferences; the Catbox toggle is not restored as enabled.
 
@@ -87,7 +90,7 @@ There is no website deployment: video processing needs the local FFmpeg process 
 
 The original `convert.ps1` and `run_converter.bat` are preserved as reference. Their workflow is recursive MP4 discovery, FFprobe inspection, bitrate-based downscaling, two-pass VP9 encoding, size retries, optional 128 kb/s MP3 extraction/Catbox upload, Base64url naming, then optional source deletion. The machine-specific `converter_config.txt`, input videos, and converted media remain local and are excluded from Git. For the old script only, copy `converter_config.example.txt` to `converter_config.txt` and set your folders; the GUI has its own settings and launchers.
 
-The GUI extends that approach with other input containers, MP4 output, duration enforcement/splitting, complete output validation, cancellation, error isolation, configurable naming, local audio retention, and a professional interface. The old script did not check duration or output dimensions, treated a silent source as a failure when Catbox was enabled, and used fixed Windows paths. Frame never imports the old script’s deletion setting or executes the original script.
+The GUI extends that approach with other input containers, MP4 output, duration enforcement/splitting, complete output validation, cancellation, error isolation, configurable naming, local audio retention, and a professional interface. The old script did not check duration or output dimensions, treated a silent source as a failure when Catbox was enabled, and used fixed Windows paths. 4chan gem converter never imports the old script’s deletion setting or executes the original script.
 
 ## Verification
 
@@ -99,7 +102,7 @@ npm run check
 
 No dependency installation is needed. Unit/API tests cover reversible names, illegal paths, size/name bounds, segmentation, cancellation, ZIP structure/CRC, and loopback authentication. Integration tests synthesize local test footage and exercise both output codecs, multiple input formats, long-video/audio segmentation, orientation, Catbox request construction and failure recovery, corruption rejection, HTTP import, conversion, download, and queue cleanup.
 
-Catbox tests use a mock network response: no test audio or user media is published. Windows was exercised locally, with 10 unit/API checks and 9 integration checks passing. Browser verification included a real two-video batch, contextual tips, Escape dismissal, pause/resume controls, and a 390-pixel-wide window with no horizontal overflow. A [completed batch preview](docs/completed-batch.jpg) shows synthetic test footage. The code and launchers target macOS and Linux, but native execution on those systems has not been performed in this workspace. The included CI workflow runs the same suites on all three operating systems when used in a GitHub repository.
+Catbox tests use a mock network response: no test audio or user media is published. Windows was exercised locally, with 10 unit/API checks and 9 integration checks passing. Browser verification covered Simple/Advanced switching, preserved settings, invalid-filename recovery, a real two-video MP4 batch, playback, ZIP download, contextual tips, Escape dismissal, pause/resume controls, and a 390-pixel-wide window with no horizontal overflow. A [completed batch preview](docs/completed-batch.jpg) shows synthetic test footage. The code and launchers target macOS and Linux, but native execution on those systems has not been performed in this workspace. The included CI workflow runs the same suites on all three operating systems when used in a GitHub repository.
 
 Use `node tests/make-preview.mjs` to create disposable synthetic videos under `test-results/fixtures/` for browser checks. Use `npm run package` to create a source-only distribution ZIP in `releases/`, excluding originals, configuration secrets, outputs, and test media.
 

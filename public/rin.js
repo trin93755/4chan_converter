@@ -1,43 +1,32 @@
 const $ = id => document.getElementById(id);
 const tips = {
-  guide: ['A little preparation goes a long way.', 'Drop in a whole batch. Choose your format once, then let the conversion queue do the work. Your originals stay untouched.'],
-  format: ['Pick your kind of magic.', 'WebM aims for compact files. MP4 is usually faster to encode. Both formats are exported silently and checked against the same limits.'],
-  audio: ['Keep the soundtrack, separately.', 'Turn on Catbox to upload an MP3 publicly and put its link in the filename. Leave it off to keep everything on your device.'],
-  encoding: ['A tidy name is a useful name.', 'Base64url is compact and portable. Prefixes and suffixes go outside the link. Encoding is reversible; it is not encryption.'],
-  privacy: ['Your workshop. Your files.', 'Video conversion happens on your computer. Only the optional Catbox setting sends audio online. No account is needed.'],
+  guide: ['Ready when you are.', 'Add a batch, choose a format, and convert. Your originals stay untouched.'],
+  format: ['WebM or MP4?', 'WebM is compact. MP4 is usually faster. Both are silent and checked for /pol/.'],
+  audio: ['Keep the soundtrack.', 'Catbox uploads a public MP3 and adds its link to the filename. A local copy is saved too.'],
+  encoding: ['Choose how the link looks.', 'Base64url is compact. All options are reversible. Encoding is not encryption.'],
 };
 const notes = [
-  ['Leave the details to me.', "Add your videos together. I'll help you keep the whole batch within the limits."],
-  ['Keep the whole story.', 'Long videos can be split into matching parts automatically. Change that in Advanced options.'],
-  ['A little space to spare.', 'The size target leaves room below the limit. Each finished video is decoded and checked before it gets its badge.'],
-  ['The soundtrack is optional.', 'Catbox gives your audio its own public link. Your video stays silent, and a local MP3 is saved too.'],
-  ['Make the filename yours.', 'Find link encoding, prefixes, suffixes, and a live filename preview in Advanced options.'],
-  ['Prefer a quieter workshop?', 'Use the pause button beside Help to stop the character animations. Your system’s reduced-motion preference is respected too.'],
+  ['Ready when you are.', 'Add a batch, choose a format, and convert. Originals stay untouched.'],
+  ['Keep the whole clip.', 'Long videos split automatically. Change this in Advanced.'],
+  ['Every export gets checked.', 'Size, duration, codec, and silence are verified before saving.'],
+  ['Your files stay local.', 'Only optional Catbox audio goes online. Anyone with its link can listen.'],
+  ['Make the name yours.', 'Advanced has link encodings, prefixes, suffixes, and a live preview.'],
+  ['Pause whenever you like.', 'The header pause button stops my animations. Reduced motion is respected too.'],
 ];
-let noteIndex = 0, lastContext = '', initialized = false;
-function note(title, message, mood = 'A little guidance') {
-  $('rinTitle').textContent = title; $('rinMessage').textContent = message; $('rinMood').textContent = mood;
-}
+let noteIndex = -1, lastContext = '';
 export function updateRinContext(state) {
-  if (!initialized) return;
   const files = state.files || [];
   const errors = files.filter(f => f.state === 'error').length;
   const done = files.filter(f => f.state === 'done').length;
-  const key = state.batch?.active ? 'active' : errors ? `error:${errors}` : done ? `done:${done}:${files.length}` : files.length ? `queued:${files.length}` : 'empty';
+  const key = state.batch?.active ? 'active' : errors ? 'error' : done === files.length && done ? 'done' : 'ready';
   if (key === lastContext) return;
   lastContext = key;
-  if (state.batch?.active) note('Good things take a little precision.', 'I’ll keep an eye on the queue. Finished files are checked for size, duration, codec, and audio before they’re saved.', 'At work');
-  else if (errors) note('Let’s take another look.', 'Check the message beside the affected video. Your originals and any completed exports are safe.', 'Needs attention');
-  else if (done && done === files.length) note('Your exports are ready.', 'Preview the results, open their folder, or download the whole batch. Check any audio notices before posting.', 'All checked');
-  else if (files.length) note(`${files.length === 1 ? 'One video' : `${files.length} videos`}. You’re all set.`, 'Choose WebM or MP4, decide whether to keep the audio separately, and start your conversion.', 'Ready when you are');
-  else note(...notes[0]);
+  tips.guide = key === 'active' ? ['Working on it.', 'You can leave this tab in the background. Cancel keeps finished exports.'] :
+    key === 'error' ? ['One needs attention.', 'Check the error beside that file. Convert again to retry. Originals are safe.'] :
+    key === 'done' ? ['All checked.', 'Preview a video, open its folder, or download the ZIP.'] : notes[0];
 }
 export function initRin() {
-  initialized = true;
-  const nextNote = () => { noteIndex = (noteIndex + 1) % notes.length; note(...notes[noteIndex]); };
-  $('rinNextTip').addEventListener('click', nextNote);
-  $('rinGuideButton').addEventListener('click', nextNote);
-
+  $('rinGuideButton').addEventListener('click', () => { noteIndex = (noteIndex + 1) % notes.length; tips.guide = notes[noteIndex]; });
   const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
   let paused = false;
   try { paused = localStorage.getItem('frame-motion-paused') === 'true'; } catch {}
@@ -102,7 +91,8 @@ export function initRin() {
       if (anchor === button && !pinned && !pointerOverBubble) hide();
     });
     button.addEventListener('click', () => {
-      if (anchor === button && pinned) hide(); else show(button, true);
+      if (button.id === 'rinGuideButton') show(button, true);
+      else if (anchor === button && pinned) hide(); else show(button, true);
     });
   }
   bubble.addEventListener('pointerenter', () => { pointerOverBubble = true; clearTimeout(closeTimer); });
