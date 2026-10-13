@@ -12,6 +12,7 @@ import { validateOptions, outputName } from './lib/naming.mjs';
 import { writeZip } from './lib/zip.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
+const { version: APP_VERSION } = JSON.parse(await fs.readFile(path.join(ROOT, 'package.json'), 'utf8'));
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webm': 'video/webm', '.mp4': 'video/mp4', '.jpg': 'image/jpeg', '.mp3': 'audio/mpeg', '.zip': 'application/zip', '.json': 'application/json' };
 const equal = (a, b) => typeof a === 'string' && Buffer.byteLength(a) === Buffer.byteLength(b) && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 
@@ -48,7 +49,7 @@ export async function createApp({ outputRoot = path.join(ROOT, 'outputs'), token
   }
 
   async function manifest() {
-    const data = { application: '4chan gem converter 1.2.0', profile: PROFILE, created: batch.started,
+    const data = { application: `4chan gem converter ${APP_VERSION}`, profile: PROFILE, created: batch.started,
       files: batch.ids.map(id => files.get(id)).filter(Boolean).map(item => ({ source: item.name, state: item.state, error: item.error,
         outputs: item.outputs.map(({ path: filePath, audioPath, ...output }) => ({ ...output, file: path.relative(batch.outputDir, filePath), localAudio: audioPath ? path.relative(batch.outputDir, audioPath) : null })) })) };
     const temp = path.join(batch.outputDir, '.conversion-report.tmp');
@@ -94,7 +95,7 @@ export async function createApp({ outputRoot = path.join(ROOT, 'outputs'), token
       }
       if (!equal(req.headers['x-frame-token'], token)) return json(res, 401, { error: 'Open 4chan gem converter using the link shown in the launcher.' });
       if (closing) return json(res, 503, { error: '4chan gem converter is shutting down.' });
-      if (req.method === 'GET' && url.pathname === '/api/config') return json(res, 200, { profile: PROFILE, dependencies: await depsPromise, outputRoot, extensions: [...EXTENSIONS], version: '1.2.0' });
+      if (req.method === 'GET' && url.pathname === '/api/config') return json(res, 200, { profile: PROFILE, dependencies: await depsPromise, outputRoot, extensions: [...EXTENSIONS], version: APP_VERSION });
       if (req.method === 'GET' && url.pathname === '/api/state') return json(res, 200, publicState());
       if (req.method === 'POST' && url.pathname === '/api/files') {
         const deps = await depsPromise;
@@ -196,7 +197,7 @@ export async function createApp({ outputRoot = path.join(ROOT, 'outputs'), token
         if (!archivePromise) {
           const outputFiles = [...results.values()].map(item => ({ path: item.path, name: `${item.id}/${item.name}` }));
           for (const output of results.values()) if (output.audioPath) outputFiles.push({ path: output.audioPath, name: `${output.id}/${path.basename(output.audioPath)}` });
-          const report = { application: '4chan gem converter 1.2.0', profile: PROFILE, created: new Date().toISOString(),
+          const report = { application: `4chan gem converter ${APP_VERSION}`, profile: PROFILE, created: new Date().toISOString(),
             files: [...files.values()].filter(item => item.outputs.length).map(item => ({ source: item.name,
               outputs: item.outputs.map(({ path: ignored, audioPath, ...output }) => ({ ...output,
                 file: `${output.id}/${output.name}`, localAudio: audioPath ? `${output.id}/${path.basename(audioPath)}` : null })) })) };

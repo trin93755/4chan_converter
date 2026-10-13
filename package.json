@@ -1,6 +1,6 @@
 {
   "name": "4chan-gem-converter",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
   "type": "module",
   "description": "A local, cross-platform batch video converter for /pol/.",
@@ -11,7 +11,9 @@
     "start": "node server.mjs",
     "test": "node --test tests/*.test.mjs",
     "test:media": "node --test tests/media.integration.mjs",
-    "check": "node --check server.mjs && node --check lib/converter.mjs && node --check public/app.js && node --check public/rin.js",
-    "package": "node scripts/package.mjs"
+    "check": "node --check server.mjs && node --check lib/converter.mjs && node --check public/app.js && node --check public/rin.js && node --check packaging/launch.mjs && node --check scripts/package-portable.mjs && node --check lib/download.mjs && node --check scripts/zip-release.mjs",
+    "package": "node scripts/package.mjs",
+    "package:portable": "node scripts/package-portable.mjs",
+    "test:package": "node scripts/smoke-package.mjs"
   }
 }

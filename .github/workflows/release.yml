@@ -1,0 +1,64 @@
+name: Build user downloads
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            target: win32-x64
+          - os: macos-15
+            target: darwin-arm64
+          - os: macos-15-intel
+            target: darwin-x64
+          - os: ubuntu-24.04
+            target: linux-x64
+          - os: ubuntu-24.04-arm
+            target: linux-arm64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Check release version
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            test "$GITHUB_REF_NAME" = "v$(node -p 'JSON.parse(require("fs").readFileSync("package.json")).version')"
+          fi
+      - run: npm run check
+      - run: npm run package:portable -- ${{ matrix.target }}
+      - run: npm run test:package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: download-${{ matrix.target }}
+          path: |
+            releases/*.zip
+            releases/*.sha256
+          if-no-files-found: error
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: package
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: releases
+          pattern: download-*
+          merge-multiple: true
+      - name: Publish tested downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" releases/*.zip releases/*.sha256 --verify-tag --title "4chan gem converter ${GITHUB_REF_NAME#v}" --notes-file docs/release-notes.md
