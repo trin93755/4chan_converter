@@ -1,0 +1,27 @@
+{
+  "tool": "OpenAI built-in image_gen",
+  "mode": "generate with visual references",
+  "created": "2026-10-13",
+  "character": "Rin Tohsaka from Fate/stay night (TYPE-MOON); unofficial fan-made interface artwork, no affiliation implied.",
+  "reference": "https://static.zerochan.net/Tohsaka.Rin.full.648685.jpg",
+  "sheets": [
+    {
+      "file": "rin-guide.png",
+      "layout": "2x2",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: transparent pixel-art animation sprite sheet for a polished dark desktop application.\nPrimary request: Rin Tohsaka from Fate/stay night, an adorable recognizably Rin pixel chibi assistant giving advice. Use the attached character sheet only as an identity/costume reference: long charcoal-black hair, two black ribbon side tails, blue-teal eyes, crimson long-sleeved turtleneck with white cross emblem, black pleated skirt, black stockings and brown-black shoes. Fully clothed, wholesome, nonsexual chibi, confident slightly smug friendly expression.\nLayout contract: SQUARE 1024x1024 PNG, genuinely transparent alpha background. EXACTLY FOUR animation frames in an exact evenly divided 2 by 2 grid. Every cell is exactly 512x512. No visible grid. Same one full-body character centered in EACH cell, same size, same camera and foot baseline at local y=462, full head and shoes visible, character spans about x=100..412, y=60..462 within each cell. At least 48 pixels of clear margin around each sprite. No elements cross cell boundaries. The four frames are read upper-left, upper-right, lower-left, lower-right.\nAnimation: Frame 1: Rin stands with one hand on hip, other index finger lifted teaching, both eyes open. Frame 2: identical pose, finger shifted very slightly, eyes blinking shut, hair tips move a tiny amount. Frame 3: same pose, eyes open, lifted hand makes a tiny confident pointing gesture. Frame 4: return nearly to first pose, slight twintail swing, eyes open. Feet and body baseline stay registered between frames. Very subtle loop, no huge pose jumps.\nMedium: authentic highly crafted 32-bit pixel game sprite art, clear small square pixel clusters and stair-step edges, no antialiasing blur, no painted or vector surfaces, restricted 24-color palette. Design each 512px cell as a 128x128 logical pixel canvas enlarged exactly 4x nearest-neighbor. Readable delicate facial features at small size. Charcoal outline with tiny soft burgundy/cream rim highlights so black hair is visible on an almost-black UI. Not a sticker: no white outline.\nNo text, speech bubbles, floor, background, gradient, shadow rectangle, frames, captions, extra characters, logos or watermarks. Preserve true alpha transparency in all empty areas."
+    },
+    {
+      "file": "rin-jewel.png",
+      "layout": "2x2",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: second transparent pixel-art animation sprite sheet, companion to the first supplied sprite sheet, for a dark premium video-conversion app.\nReference roles: first image is the exact pixel chibi character, style and 2x2 sprite-sheet layout to MATCH. Second image is supporting Rin Tohsaka character identity/costume reference.\nCreate another 2 by 2, FOUR-frame transparent sprite sheet of Rin Tohsaka. Same adorable full-body pixel chibi, identical charcoal-black hair with black side ribbons and twin tails, turquoise eyes, crimson turtleneck with small white cross emblem, black pleated skirt, black stockings, brown-black shoes. Fully clothed, wholesome and nonsexual.\nNew action: Rin holds a tiny luminous ruby-red faceted jewel above her open left palm, right hand resting confidently on her hip. Small four-point blue sparkles move around the gem across four frames. Confident helpful expression. Frame 1: eyes open, jewel low over palm. Frame 2: eyes blinking, jewel slightly higher. Frame 3: eyes open, proud tiny smile and a bright tiny star by gem. Frame 4: eyes open, jewel returns to start. Frame motion very subtle; feet and body stay aligned.\nLayout: square image, EXACTLY 4 cells in 2 columns and 2 rows. Each frame occupies exactly one quarter, aligned to identical local coordinates. Center full-body character in each cell, 8% transparent margin all around; feet at local 92% height; head at local 9%. No overlap between cells. Exact same scale/baselines for all frames. Read frames upper left, upper right, lower left, lower right.\nArt direction: exquisite crunchy 32-bit pixel game sprites; visible small square pixel clusters and stepped edges. Limited palette, tiny bright ruby and blue jewel highlights against dark hair. Crisp pixel edges, no blur. Dark charcoal outlines with subdued burgundy edge highlights, no white sticker border.\nGenuinely transparent alpha in all empty areas. No background, checkerboard drawn into art, platform, rectangle, captions, letters, speech bubbles, grid, watermark or extra objects."
+    }
+  ]
+}

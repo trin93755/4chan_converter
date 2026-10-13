@@ -1,0 +1,25 @@
+name: Cross-platform checks
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install FFmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg --no-progress -y
+      - name: Install FFmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: brew list ffmpeg || brew install ffmpeg
+      - run: npm run check
+      - run: npm test
+      - run: npm run test:media

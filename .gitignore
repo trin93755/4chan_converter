@@ -1,0 +1,11 @@
+outputs/
+inputs_mp4/
+outputs_webm/
+converter_config.txt
+bin/
+.frame-work/
+test-results/
+node_modules/
+*.log
+releases/
+.DS_Store

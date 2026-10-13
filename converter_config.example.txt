@@ -1,0 +1,7 @@
+# Optional configuration for the original PowerShell converter only.
+# Copy to converter_config.txt and replace these paths with your folders.
+INPUT_DIR=C:\Videos\Input
+OUTPUT_DIR=C:\Videos\Output
+DELETE_SOURCE=NO
+CATBOX_UPLOAD=NO
+CATBOX_USERHASH=

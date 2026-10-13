@@ -1,0 +1,15 @@
+{
+  "name": "frame-local-converter",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A local, cross-platform batch video converter for /pol/.",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:media": "node --test tests/media.integration.mjs",
+    "check": "node --check server.mjs && node --check lib/converter.mjs && node --check public/app.js && node --check public/rin.js",
+    "package": "node scripts/package.mjs"
+  }
+}

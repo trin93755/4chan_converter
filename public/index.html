@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101014">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Convert videos locally into verified, silent WebM and MP4 files for /pol/.">
+  <title>Frame — Tohsaka Edition</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/rin.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Frame home"><img src="/icon.svg" width="34" height="34" alt=""><span>frame<span class="brand-dot">.</span></span></a>
+    <span class="header-divider"></span><span class="app-description">TOHSAKA EDITION</span>
+    <div class="header-right"><span class="local-badge"><span class="status-dot"></span> Local &amp; private</span><button class="icon-button" id="motionToggle" aria-label="Pause character animations" aria-pressed="false" title="Pause character animations"><svg id="motionIcon"><use href="#pause"/></svg></button><button class="icon-button" id="helpButton" aria-label="Help and requirements" title="Help and requirements"><svg><use href="#help"/></svg></button></div>
+  </header>
+
+  <main>
+    <div class="page-heading"><div><div class="eyebrow"><span class="tiny-gem"></span> PRECISION. WITH A LITTLE MAGECRAFT.</div><h1>Every video.<br class="mobile-break"> <span>A perfect fit.</span></h1><p>Your local video workshop. Prepared for <span class="inline-code">/pol/</span>, down to the last detail.</p></div><div class="profile-badge"><svg><use href="#gem"/></svg><div><strong>/pol/ preset</strong><span>Silent. Sized. Verified.</span></div></div></div>
+    <div class="notice error-notice" id="connectionNotice" role="alert" hidden></div>
+    <div class="notice error-notice" id="setupNotice" role="alert" hidden></div>
+    <div class="workspace">
+      <div class="queue-column">
+      <section class="queue-panel panel" aria-labelledby="queueHeading">
+        <div class="panel-heading"><h2 id="queueHeading"><span class="section-number">01</span> Conversion queue <span class="count-badge" id="fileCount">0</span></h2><button id="clearButton" class="text-button" disabled>Clear queue</button></div>
+        <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Add videos. Click to browse or drop files here.">
+          <div class="upload-art"><span class="orbit-corner orbit-corner-one"></span><svg><use href="#upload"/></svg><span class="orbit-corner orbit-corner-two"></span></div>
+          <h3>Drop your videos here</h3><p>or <span class="browse-link">browse files</span> to get started</p>
+          <div class="format-list">MP4 <span>·</span> WEBM <span>·</span> MOV <span>·</span> MKV <span>·</span> AVI <span>+ more</span></div>
+        </div>
+        <input type="file" id="fileInput" multiple accept="video/*,.mkv,.m4v,.mts,.m2ts,.ts,.wmv,.flv,.ogv,.vob" hidden>
+        <input type="file" id="folderInput" multiple webkitdirectory hidden>
+        <div class="import-progress" id="importProgress" role="status" hidden><svg class="spin"><use href="#loader"/></svg><span id="importText"></span><progress id="importBar" max="100" value="0"></progress></div>
+        <div id="fileList" class="file-list"></div>
+        <div class="queue-empty" id="emptyMessage"><span><svg><use href="#lock"/></svg> Your originals stay untouched</span><span><svg><use href="#layers"/></svg> One clip or a whole collection</span></div>
+        <div class="queue-add"><button id="addButton" class="text-button"><svg><use href="#plus"/></svg> Add videos</button><button id="folderButton" class="text-button muted"><svg><use href="#folder"/></svg> Add folder</button><span id="queueSize">No files added</span></div>
+        <div class="queue-bottom"><div class="queue-summary"><div class="summary-icon"><svg><use href="#layers"/></svg></div><div><strong id="summaryTitle">Ready when you are</strong><span id="summaryDetail">Add videos to start your first batch</span></div></div><button class="primary-button" id="convertButton" disabled>Convert videos <svg><use href="#arrow"/></svg></button><button class="secondary-button cancel-button" id="cancelButton" hidden>Cancel batch</button></div>
+        <div id="batchProgressWrap" class="batch-progress" hidden><progress id="batchProgress" max="100" value="0" aria-label="Batch progress"></progress><span id="batchProgressLabel"></span></div>
+      </section>
+      <section class="rin-guide" aria-label="Rin's conversion tips">
+        <div class="rin-stage"><span class="magic-orbit" aria-hidden="true"></span><button class="rin-character" id="rinGuideButton" aria-label="Ask Rin for another conversion tip" data-rin-tip="guide"><span class="rin-sprite rin-sprite-guide" aria-hidden="true"></span></button><span class="stage-gem stage-gem-one" aria-hidden="true"></span><span class="stage-gem stage-gem-two" aria-hidden="true"></span></div>
+        <div class="rin-note"><div class="rin-note-heading"><span class="rin-name">RIN'S FIELD NOTES</span><span id="rinMood" class="rin-mood">A little guidance</span></div><h3 id="rinTitle">Leave the details to me.</h3><p id="rinMessage">Add your videos together. I'll help you keep the whole batch within the limits.</p><button class="text-button" id="rinNextTip">Another tip <svg><use href="#arrow"/></svg></button></div>
+      </section>
+      </div>
+
+      <aside class="settings-column">
+        <section class="settings-panel panel" aria-labelledby="settingsHeading">
+          <div class="panel-heading"><h2 id="settingsHeading"><span class="section-number">02</span> Export settings</h2><span class="small-label">/pol/</span></div>
+          <fieldset id="settingsFields">
+            <legend class="sr-only">Export settings</legend>
+            <div class="settings-section"><div class="field-heading"><span class="field-label" id="formatLabel">Video format</span><button class="hint-button" data-rin-tip="format" aria-label="Rin's tip about video formats"><svg><use href="#help"/></svg></button></div><div class="format-toggle" role="group" aria-labelledby="formatLabel"><button class="format-option selected" id="webmOption" data-format="webm" aria-pressed="true"><span>WebM</span><small>VP9 · compact</small><svg><use href="#check"/></svg></button><button class="format-option" id="mp4Option" data-format="mp4" aria-pressed="false"><span>MP4</span><small>H.264 · faster</small><svg><use href="#check"/></svg></button></div></div>
+            <div class="settings-section requirements"><div class="subheading"><svg><use href="#shield"/></svg><strong>The right settings, automatically</strong></div><dl><div><dt>File size</dt><dd>Under 4 MB</dd></div><div><dt>Duration</dt><dd>Up to 120 seconds</dd></div><div><dt>Video audio</dt><dd>Always removed</dd></div><div><dt>Long videos</dt><dd id="longVideoSummary">Split into parts</dd></div></dl><p>Every export is checked before it’s marked ready.</p></div>
+            <div class="settings-section audio-section"><div class="switch-row"><div><label for="catboxToggle" class="field-label">Keep the audio separately</label><span class="subtle">Automatically upload to Catbox</span></div><label class="switch"><input type="checkbox" id="catboxToggle" aria-describedby="catboxDescription"><span></span></label></div><div class="audio-explanation"><p id="catboxDescription">An audio link in the filename.<br>A silent video, ready to post.</p><button class="hint-button" data-rin-tip="audio" aria-label="Rin's tip about Catbox audio"><svg><use href="#help"/></svg></button></div><div id="catboxDisclosure" class="audio-disclosure" hidden><svg><use href="#globe"/></svg><span>Audio will be uploaded publicly to catbox.moe. Anyone with the link can listen. A local MP3 is saved too.</span></div></div>
+            <details id="advancedDetails" class="advanced"><summary><span><svg><use href="#sliders"/></svg> Advanced options</span><svg class="chevron"><use href="#chevron"/></svg></summary><div class="advanced-body">
+              <label class="field-label" for="longVideo">Long videos</label><select id="longVideo"><option value="split">Split automatically · keep everything</option><option value="reject">Skip videos that are too long</option></select>
+              <label class="field-label" for="naming">Filename without an audio link</label><select id="naming"><option value="source">Keep the original name</option><option value="random">Random name</option></select>
+              <div class="field-divider"></div>
+              <div class="field-heading"><label class="field-label" for="encoding">Audio link encoding</label><button class="hint-button" data-rin-tip="encoding" aria-label="Rin's tip about filename encoding"><svg><use href="#help"/></svg></button></div><select id="encoding" disabled><option value="base64url">Base64url · recommended</option><option value="base64">Base64 · escaped if needed</option><option value="utf8">Readable UTF-8 · filename-safe</option><option value="percent">URL percent encoding</option><option value="hex">Hexadecimal</option></select><p id="encodingHint" class="field-hint">Enable Catbox to put an audio link in the filename.</p>
+              <label class="checkbox-label"><input type="checkbox" id="includeSource" disabled><span>Include the original video name</span></label>
+              <div class="affix-grid"><div><label for="prefix" class="field-label">Prefix</label><input id="prefix" type="text" placeholder="e.g. audio_" maxlength="40" spellcheck="false"></div><div><label for="suffix" class="field-label">Suffix</label><input id="suffix" type="text" placeholder="e.g. _sound" maxlength="40" spellcheck="false"></div></div>
+              <div class="filename-preview"><span>FILENAME PREVIEW</span><code id="filenamePreview">my-video.webm</code></div><p id="filenameError" class="field-error" role="alert" hidden></p>
+              <label for="userhash" class="field-label">Catbox account <span class="optional">optional</span></label><input id="userhash" type="password" placeholder="Userhash" autocomplete="off" disabled><p class="field-hint">Leave blank for an anonymous upload. Kept in this session only.</p>
+              <div class="field-divider"></div><label for="outputRoot" class="field-label">Save to folder</label><input id="outputRoot" type="text" spellcheck="false"><p class="field-hint">An absolute folder path. Each batch gets its own folder.</p>
+              <button type="button" class="text-button" id="resetSettings">Reset settings</button>
+            </div></details>
+          </fieldset>
+        </section>
+        <div class="rin-sidekick"><button class="rin-mini-button" data-rin-tip="privacy" aria-label="Ask Rin about privacy"><span class="rin-sprite rin-sprite-jewel" aria-hidden="true"></span></button><div><span class="rin-name">A GEM OF ADVICE</span><p>Hover or tap a <svg><use href="#help"/></svg> for a tip from Rin.</p><span class="privacy-caption"><svg><use href="#lock"/></svg> Your videos stay on your device.</span></div></div>
+      </aside>
+    </div>
+
+    <section class="results-bar panel" id="resultsBar" hidden aria-label="Completed exports"><div class="results-caption"><span class="success-circle"><svg><use href="#check"/></svg></span><div><strong id="resultsTitle">Your exports are ready</strong><p id="resultsSubtitle">Verified and saved on your device</p></div></div><div class="results-actions"><button id="revealButton" class="secondary-button"><svg><use href="#folder"/></svg> Open folder</button><button id="downloadAll" class="primary-button"><svg><use href="#download"/></svg> Download all</button></div></section>
+    <footer><span>FRAME <span class="footer-version">TOHSAKA EDITION · 1.1</span></span><div><span id="engineStatus"><span class="status-dot"></span> Checking conversion engine</span><span class="footer-separator">/</span><span>Windows · macOS · Linux</span></div><button id="quitButton" class="text-button muted">Quit Frame</button></footer>
+  </main>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+  <div id="rinTooltip" class="rin-tooltip" role="tooltip" hidden><span class="rin-sprite rin-sprite-jewel tooltip-sprite" aria-hidden="true"></span><div><span class="rin-name">RIN'S TIP</span><strong id="rinTooltipTitle"></strong><p id="rinTooltipText"></p><span class="tooltip-dismiss-hint">Esc to dismiss</span></div></div>
+  <dialog id="helpDialog"><div class="dialog-header"><h2>A little less trial and error.</h2><button class="icon-button" id="closeHelp" aria-label="Close help"><svg><use href="#close"/></svg></button></div><p>Frame uses FFmpeg on your computer to make silent, size-checked videos for /pol/.</p><h3>Getting started</h3><ol><li>Add files or a folder. Your originals are always kept.</li><li>Choose WebM or MP4. Optionally enable Catbox audio.</li><li>Convert, then open the output folder or download a ZIP.</li></ol><h3>What “verified” means</h3><p>Every output is decoded and checked: under 4,000,000 bytes, no more than 120 seconds, one VP9 or H.264 video stream, 8-bit color, and no audio. Videos are scaled to fit and long clips are split without discarding the rest.</p><p>The /pol/ board API reported a 4,194,304-byte limit and 120 seconds on October 13, 2026. Frame uses a smaller size target for headroom. Board rules and posting filters can change; a technical check cannot guarantee a post will be accepted.</p><h3>Audio links and filenames</h3><p>Base64url is the default: reversible and safe on every supported system. For Base64, decode <code>%2F</code> back to a slash first. Readable UTF-8 escapes <code>:</code> and <code>/</code> because operating systems don’t allow literal URLs in filenames. Percent and hex encodings are reversible too. Prefixes and suffixes sit outside the encoded link.</p><p>Each split part gets its matching audio clip. The output folder includes local MP3s and a conversion report with full audio URLs, even when a filename cannot hold a link. Filename encoding is not encryption. 4chan may shorten or rename displayed filenames.</p><h3>No app signing required</h3><p>Run Frame with Node.js 22+ and a full FFmpeg installation. It opens in your normal browser and uses a private loopback address. No installer certificate, account, or cloud conversion service is required.</p><div class="source-links"><a href="https://a.4cdn.org/boards.json" target="_blank" rel="noreferrer">4chan board limits ↗</a><a href="https://catbox.moe/tools.php" target="_blank" rel="noreferrer">Catbox API ↗</a><a href="https://ffmpeg.org/download.html" target="_blank" rel="noreferrer">Get FFmpeg ↗</a></div></dialog>
+  <dialog id="previewDialog"><div class="dialog-header"><h2 id="previewTitle">Video preview</h2><button class="icon-button" id="closePreview" aria-label="Close video preview"><svg><use href="#close"/></svg></button></div><video id="previewVideo" controls playsinline></video><p id="previewInfo"></p></dialog>
+
+  <svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+    <symbol id="gem" viewBox="0 0 24 24"><path d="m12 2 8 10-8 10-8-10zM12 2l3 10-3 10-3-10zM4 12h16"/></symbol>
+    <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+    <symbol id="close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+    <symbol id="check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="upload" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 17v-5m-3 3 3-3 3 3"/></symbol>
+    <symbol id="download" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M5 15v5h14v-5"/></symbol>
+    <symbol id="folder" viewBox="0 0 24 24"><path d="M3 7V5h6l3 3h9v12H3z"/></symbol>
+    <symbol id="shield" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6z"/><path d="m8 12 3 3 5-5"/></symbol>
+    <symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></symbol>
+    <symbol id="help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1.5 1-1.5 1.5-1.5 2M12 16h.01"/></symbol>
+    <symbol id="globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></symbol>
+    <symbol id="sliders" viewBox="0 0 24 24"><path d="M4 7h8m4 0h4M4 17h3m4 0h9"/><circle cx="14" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+    <symbol id="layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5zM3 12l9 5 9-5M3 16l9 5 9-5"/></symbol>
+    <symbol id="film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4m10 0h4M3 15h4m10 0h4"/></symbol>
+    <symbol id="play" viewBox="0 0 24 24"><path d="m9 5 11 7-11 7z"/></symbol>
+    <symbol id="link" viewBox="0 0 24 24"><path d="m10 13 4-4M8 15l-2 2a3 3 0 0 1-4-4l5-5a3 3 0 0 1 4 0m2 8a3 3 0 0 0 4 0l5-5a3 3 0 0 0-4-4l-2 2"/></symbol>
+    <symbol id="loader" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9"/></symbol>
+    <symbol id="volume" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4zM15 8a5 5 0 0 1 0 8m3-11a9 9 0 0 1 0 14"/></symbol>
+    <symbol id="alert" viewBox="0 0 24 24"><path d="m12 3 10 18H2zM12 9v5m0 3h.01"/></symbol>
+  </defs></svg>
+</body>
+</html>
