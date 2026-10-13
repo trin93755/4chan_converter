@@ -16,11 +16,14 @@ try {
   const archive = path.join(root, 'releases', `4chan-gem-converter-${names[target]}.zip`);
   if (process.platform === 'win32') await run('tar', ['-xf', archive, '-C', temporary]);
   else await run('unzip', ['-q', archive, '-d', temporary]);
-  const app = path.join(temporary, '4chan gem converter');
+  // macOS /var resolves through /private/var; also check explicit folder aliases.
+  const app = path.join(temporary, 'Launch alias');
+  await fs.symlink(path.join(temporary, '4chan gem converter'), app, process.platform === 'win32' ? 'junction' : 'dir');
   const node = path.join(app, 'bin', process.platform === 'win32' ? 'node.exe' : 'node');
   const launcher = path.join(app, 'packaging/launch.mjs');
   const manifest = JSON.parse(await fs.readFile(path.join(app, 'packaging/runtimes.json'), 'utf8'));
   const setup = await run(node, [launcher, '--setup-only'], { timeout: 600_000 });
+  assert.match(setup.stdout, /Video engine ready\./);
   console.log(setup.stdout);
   const engine = path.join(app, 'bin', manifest.engineRelease);
   const env = { ...process.env,

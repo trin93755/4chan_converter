@@ -32,7 +32,8 @@ export async function prepareEngine() {
   return paths;
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+const invokedPath = process.argv[1] ? await fs.realpath(process.argv[1]).catch(() => null) : null;
+if (invokedPath === fileURLToPath(import.meta.url)) {
   try {
     console.log('\n4chan gem converter\n');
     const engine = await prepareEngine();

@@ -232,7 +232,8 @@ export async function createApp({ outputRoot = path.join(ROOT, 'outputs'), token
   return { server, token, close, files, results, work };
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+const invokedPath = process.argv[1] ? await fs.realpath(process.argv[1]).catch(() => null) : null;
+if (invokedPath === fileURLToPath(import.meta.url)) {
   if (Number(process.versions.node.split('.')[0]) < 22) throw new Error('4chan gem converter needs Node.js 22 or newer.');
   const app = await createApp();
   const portArg = process.argv.indexOf('--port');
