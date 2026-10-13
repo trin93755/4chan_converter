@@ -2,7 +2,7 @@
 
 A local batch video converter for 4chan’s `/pol/`: drop in common video files, choose WebM or MP4, and get silent, verified exports. Optional Catbox uploads put a reversible audio link in the filename.
 
-The interface is always dark, with a crimson and charcoal palette, jewel details, and two animated pixel-art Rin companions. Contextual tips work with hover, keyboard focus, or a tap. Pause character motion from the header; system reduced-motion settings are also respected. These are unofficial fan-made Rin Tohsaka illustrations, inspired by TYPE-MOON’s Fate/stay night. Asset prompts and provenance are recorded in [`public/art/provenance.json`](public/art/provenance.json).
+The interface is always dark, with a cold graphite and steel-blue palette, restrained crimson accents, and two animated pixel-art Rin companions. Contextual tips work with hover, keyboard focus, or a tap. Pause character motion from the header; system reduced-motion settings are also respected. These are unofficial fan-made Rin Tohsaka illustrations, inspired by TYPE-MOON’s Fate/stay night. Asset prompts and provenance are recorded in [`public/art/provenance.json`](public/art/provenance.json).
 
 ![Frame’s dark Tohsaka-inspired interface, conversion queue, settings and pixel-art companions](docs/preview.jpg)
 
