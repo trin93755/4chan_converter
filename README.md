@@ -7,10 +7,10 @@ Batch-convert videos into silent, size-checked WebM or MP4 files for **/pol/**.
 | Your computer | Download |
 | --- | --- |
 | Windows 10 / 11, 64-bit | [Windows](https://github.com/trin93755/4chan_converter/releases/latest/download/4chan-gem-converter-windows-x64.zip) |
-| Mac with Apple silicon (M1 or newer) | [macOS — Apple silicon](https://github.com/trin93755/4chan_converter/releases/latest/download/4chan-gem-converter-macos-apple-silicon.zip) |
-| Mac with Intel | [macOS — Intel](https://github.com/trin93755/4chan_converter/releases/latest/download/4chan-gem-converter-macos-intel.zip) |
+| Mac with Apple silicon (M1 or newer) | [macOS (Apple silicon)](https://github.com/trin93755/4chan_converter/releases/latest/download/4chan-gem-converter-macos-apple-silicon.zip) |
+| Mac with Intel | [macOS (Intel)](https://github.com/trin93755/4chan_converter/releases/latest/download/4chan-gem-converter-macos-intel.zip) |
 | Linux, 64-bit PC | [Linux](https://github.com/trin93755/4chan_converter/releases/latest/download/4chan-gem-converter-linux-x64.zip) |
-| Linux, ARM64 | [Linux — ARM64](https://github.com/trin93755/4chan_converter/releases/latest/download/4chan-gem-converter-linux-arm64.zip) |
+| Linux, ARM64 | [Linux (ARM64)](https://github.com/trin93755/4chan_converter/releases/latest/download/4chan-gem-converter-linux-arm64.zip) |
 
 1. **Download and extract** the whole ZIP.
 2. **Open Start** (`Start.bat`, `Start.command`, or `Start.sh`).

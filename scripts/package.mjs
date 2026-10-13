@@ -11,7 +11,7 @@ async function add(relative) {
     for (const name of await fs.readdir(absolute)) await add(path.join(relative, name));
   } else files.push({ path: absolute, name: `4chan-gem-converter/${relative.replaceAll('\\', '/')}` });
 }
-for (const name of ['server.mjs', 'package.json', 'README.md', 'Start 4chan gem converter.bat', 'Start 4chan gem converter.command', 'start.sh', 'lib', 'public', 'tests', 'scripts', 'packaging', 'docs', '.github', '.gitignore', '.gitattributes']) await add(name);
+for (const name of ['server.mjs', 'package.json', 'README.md', 'AGENTS.md', 'Start 4chan gem converter.bat', 'Start 4chan gem converter.command', 'start.sh', 'lib', 'public', 'tests', 'scripts', 'packaging', 'docs', '.github', '.gitignore', '.gitattributes']) await add(name);
 await fs.mkdir(path.join(root, 'releases'), { recursive: true });
 const { version } = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'));
 const destination = path.join(root, 'releases', `4chan-gem-converter-${version}.zip`);

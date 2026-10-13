@@ -140,7 +140,7 @@ function render() {
   $('resultsBar').hidden = out.length === 0;
   $('resultsTitle').textContent = `${out.length} ${active() ? 'saved' : 'ready'}`;
   const warningCount = out.filter(o => o.warning).length;
-  $('resultsSubtitle').textContent = warningCount ? `${warningCount} audio ${warningCount === 1 ? 'notice' : 'notices'} — see files above.` : '';
+  $('resultsSubtitle').textContent = warningCount ? `${warningCount} audio ${warningCount === 1 ? 'notice' : 'notices'}. See files above.` : '';
   $('resultsSubtitle').hidden = warningCount === 0;
   if (state.batch?.error) { $('connectionNotice').textContent = state.batch.error; $('connectionNotice').hidden = false; }
   updateActions();
