@@ -10,6 +10,7 @@ import { spawn } from 'node:child_process';
 import { PROFILE, EXTENSIONS, TOOL, dependencies, probe, run, convert } from './lib/converter.mjs';
 import { validateOptions, outputName } from './lib/naming.mjs';
 import { writeZip } from './lib/zip.mjs';
+import { isMain } from './lib/main.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const { version: APP_VERSION } = JSON.parse(await fs.readFile(path.join(ROOT, 'package.json'), 'utf8'));
@@ -232,8 +233,7 @@ export async function createApp({ outputRoot = path.join(ROOT, 'outputs'), token
   return { server, token, close, files, results, work };
 }
 
-const invokedPath = process.argv[1] ? await fs.realpath(process.argv[1]).catch(() => null) : null;
-if (invokedPath === fileURLToPath(import.meta.url)) {
+if (await isMain(import.meta.url)) {
   if (Number(process.versions.node.split('.')[0]) < 22) throw new Error('4chan gem converter needs Node.js 22 or newer.');
   const app = await createApp();
   const portArg = process.argv.indexOf('--port');

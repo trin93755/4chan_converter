@@ -7,8 +7,26 @@ import path from 'node:path';
 import { gzipSync, inflateRawSync } from 'node:zlib';
 import { downloadVerified, unpackVerified } from '../lib/download.mjs';
 import { zipRelease } from '../scripts/zip-release.mjs';
+import { pathToFileURL } from 'node:url';
+import { isMain } from '../lib/main.mjs';
 
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
+test('entry detection follows directory aliases and Windows path casing', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'gem-entry-'));
+  try {
+    const real = path.join(dir, 'MixedCase');
+    const alias = path.join(dir, 'alias');
+    await fs.mkdir(real);
+    await fs.writeFile(path.join(real, 'entry.mjs'), '');
+    await fs.writeFile(path.join(real, 'other.mjs'), '');
+    await fs.symlink(real, alias, process.platform === 'win32' ? 'junction' : 'dir');
+    const url = pathToFileURL(path.join(real, 'entry.mjs'));
+    assert.equal(await isMain(url, path.join(alias, 'entry.mjs')), true);
+    assert.equal(await isMain(url, path.join(real, 'other.mjs')), false);
+    assert.equal(await isMain(url, path.join(dir, 'missing.mjs')), false);
+    if (process.platform === 'win32') assert.equal(await isMain(url, path.join(alias, 'entry.mjs').toLowerCase()), true);
+  } finally { await fs.rm(dir, { recursive: true, force: true }); }
+});
 test('engine downloads reject changed bytes, preserve existing files, and reuse verified files offline', async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'gem-download-'));
   try {
